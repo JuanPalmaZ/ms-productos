@@ -1,0 +1,57 @@
+server:
+ port: 8085 # Puerto asignado exclusivamente para el microservicio de productos
+
+spring:
+  application:
+    name: ms-productos # Nombre con el que se registrará en el panel de Eureka
+ # ===================================
+ # Configuración de Rendimiento
+ # ===================================
+
+  threads:
+    virtual:
+      enabled: true # Aprovecha los hilos virtuales de tu JDK moderno
+
+  mvc:
+    problemdetails:
+      enabled: false # Desactivado para usar tu GlobalExceptionHandler personalizado
+ # ===================================
+ # Conexión a PostgreSQL (NeonTech)
+ # ===================================
+  datasource:
+    url: jdbc:postgresql://ep-calm-queen-achhrz8o-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+    username: neondb_owner
+    password: npg_komzZ8dNqLU1
+    driver-class-name: org.postgresql.Driver
+
+  # Pool de conexiones optimizado para el plan gratuito de Neon
+  hikari:
+   maximum-pool-size: 5
+
+ # ===================================
+ # Configuración de Hibernate / JPA
+ # ===================================
+
+  jpa: 
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update # Creará las tablas automáticamente (proveedores, documentos)
+    show-sql: true # Muestra las consultas en consola
+    properties:
+      hibernate:
+        format_sql: true # Formatea el SQL para que sea legible
+
+# ===================================
+# Configuración del Cliente Eureka
+# ===================================
+eureka:
+ client:
+  register-with-eureka: true # Se registra en el servidor central
+  fetch-registry: true   # Descarga la lista de otros servicios
+  service-url:
+   defaultZone: http://localhost:8761/eureka/ # Dirección del servidor Eureka
+ instance:
+  prefer-ip-address: true # Facilita la comunicación interna mediante IP
+
+jwt:
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
