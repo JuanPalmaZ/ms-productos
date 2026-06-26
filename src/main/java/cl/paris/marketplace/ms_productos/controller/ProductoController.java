@@ -22,10 +22,16 @@ import cl.paris.marketplace.ms_productos.dto.CategoriaResponse;
 import cl.paris.marketplace.ms_productos.dto.ProductoRequest;
 import cl.paris.marketplace.ms_productos.dto.ProductoResponse;
 import cl.paris.marketplace.ms_productos.service.ProductoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/productos")
+@Tag(name = "Productos", description = "Endpoints para la gestión del catálogo de productos y categorías")
 public class ProductoController {
 
     private final ProductoService productoService;
@@ -38,6 +44,17 @@ public class ProductoController {
     // CRUD: PRODUCTOS
     // ==========================================
 
+    @Operation(summary = "Registra un nuevo producto en el catálogo")
+    @ApiResponse(responseCode = "201", description = "Producto registrado exitosamente")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Payload con los detalles del producto",
+        content = @Content(
+            examples = @ExampleObject(
+                name = "EjemploCrearProducto",
+                value = "{\n  \"sku\": \"TEC-001\",\n  \"nombre\": \"Notebook Gamer\",\n  \"descripcion\": \"Notebook 15 pulgadas, 16GB RAM\",\n  \"precio\": 599990.00,\n  \"stock\": 10,\n  \"categoriaId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}"
+            )
+        )
+    )
     @PreAuthorize("hasRole('PROVEEDOR') or hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ProductoResponse> registrarProducto(
@@ -49,6 +66,17 @@ public class ProductoController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Modifica los detalles de un producto existente")
+    @ApiResponse(responseCode = "200", description = "Producto modificado exitosamente")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Payload con los datos actualizados del producto",
+        content = @Content(
+            examples = @ExampleObject(
+                name = "EjemploModificarProducto",
+                value = "{\n  \"sku\": \"TEC-001\",\n  \"nombre\": \"Notebook Gamer Actualizado\",\n  \"descripcion\": \"Nueva descripción del producto\",\n  \"precio\": 550000.00,\n  \"stock\": 15,\n  \"categoriaId\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\"\n}"
+            )
+        )
+    )
     @PreAuthorize("hasRole('PROVEEDOR') or hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ProductoResponse> modificarProducto(
@@ -61,6 +89,8 @@ public class ProductoController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Realiza un borrado lógico de un producto")
+    @ApiResponse(responseCode = "204", description = "Producto eliminado exitosamente")
     @PreAuthorize("hasRole('PROVEEDOR') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarProductoLogico(@PathVariable UUID id) {
@@ -68,6 +98,8 @@ public class ProductoController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Actualiza el stock disponible de un producto sumando o restando unidades")
+    @ApiResponse(responseCode = "200", description = "Stock actualizado exitosamente")
     @PreAuthorize("hasAnyRole('PROVEEDOR', 'ADMIN', 'CLIENTE')")
     @PutMapping("/{id}/stock")
     public ResponseEntity<ProductoResponse> actualizarStock(
@@ -80,6 +112,9 @@ public class ProductoController {
     // ==========================================
     // ENDPOINT ADMINISTRATIVO (Llamado vía Feign)
     // ==========================================
+    
+    @Operation(summary = "Actualiza el estado de moderación de un producto (Administrativo)")
+    @ApiResponse(responseCode = "200", description = "Estado de moderación actualizado exitosamente")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/estado-moderacion")
     public ResponseEntity<Void> actualizarEstadoModeracion(
@@ -94,6 +129,8 @@ public class ProductoController {
     // ENDPOINTS: CONSULTAS
     // ==========================================
 
+    @Operation(summary = "Obtiene los detalles completos de un producto según su ID")
+    @ApiResponse(responseCode = "200", description = "Producto obtenido exitosamente")
     @PreAuthorize("hasAnyRole('CLIENTE', 'PROVEEDOR', 'ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ProductoResponse> obtenerProductoPorId(@PathVariable UUID id) {
@@ -101,6 +138,8 @@ public class ProductoController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Lista todos los productos activos en el marketplace")
+    @ApiResponse(responseCode = "200", description = "Lista de productos obtenida exitosamente")
     @PreAuthorize("hasAnyRole('CLIENTE', 'PROVEEDOR', 'ADMIN')")
     @GetMapping
     public ResponseEntity<List<ProductoResponse>> listarProductosActivos() {
@@ -108,6 +147,8 @@ public class ProductoController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Lista todos los productos asociados a un usuario proveedor específico")
+    @ApiResponse(responseCode = "200", description = "Productos del proveedor listados exitosamente")
     @PreAuthorize("hasRole('ADMIN') or (hasRole('PROVEEDOR') and #usuarioId.toString() == authentication.credentials)")
     @GetMapping("/proveedor/usuario/{usuarioId}")
     public ResponseEntity<List<ProductoResponse>> listarProductosPorProveedor(@PathVariable UUID usuarioId) {
@@ -119,6 +160,17 @@ public class ProductoController {
     // ENDPOINTS: CATEGORÍAS
     // ==========================================
 
+    @Operation(summary = "Crea una nueva categoría para clasificar productos")
+    @ApiResponse(responseCode = "201", description = "Categoría creada exitosamente")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Payload con los datos de la nueva categoría",
+        content = @Content(
+            examples = @ExampleObject(
+                name = "EjemploCategoria",
+                value = "{\n  \"nombre\": \"Electrónica\",\n  \"descripcion\": \"Dispositivos tecnológicos, computación y audio\"\n}"
+            )
+        )
+    )
     @PreAuthorize("hasAnyRole('CLIENTE', 'PROVEEDOR', 'ADMIN')")
     @PostMapping("/categorias")
     public ResponseEntity<CategoriaResponse> crearCategoria(@Valid @RequestBody CategoriaRequest request) {
@@ -126,6 +178,8 @@ public class ProductoController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Obtiene la lista de todas las categorías disponibles")
+    @ApiResponse(responseCode = "200", description = "Lista de categorías obtenida exitosamente")
     @PreAuthorize("hasAnyRole('CLIENTE', 'PROVEEDOR', 'ADMIN')")
     @GetMapping("/categorias")
     public ResponseEntity<List<CategoriaResponse>> listarCategorias() {
