@@ -27,7 +27,13 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(auth -> auth
             // ¡ESTA LÍNEA ES VITAL EN SPRING SECURITY 6!
-            .requestMatchers("/error").permitAll() 
+            .requestMatchers("/error",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/doc/swagger-ui/**",
+                        "/doc/swagger-ui.html/**").permitAll() 
             
             // Tus otras rutas permitidas si las hay (ej: /api/auth/**)
             .anyRequest().authenticated()
