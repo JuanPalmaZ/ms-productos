@@ -64,3 +64,12 @@ eureka:
     health-check-url: https://${RENDER_EXTERNAL_HOSTNAME}/actuator/health
 jwt:
   secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+# ===================================
+# Swagger / Springdoc
+# ===================================
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /doc/swagger-ui.html
